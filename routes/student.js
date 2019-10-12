@@ -2,6 +2,12 @@ const router = require('express').Router();
 const Student = require('../db/models/students');
 const Test = require('../db/models/tests');
 
+router.get('/', function(req, res, next) {
+  Student.findAll({ include: { all: true } }).then(students =>
+    res.json(students)
+  );
+});
+
 router.get('/:studentId', function(req, res, next) {
   Student.findById(req.params.studentId)
     .then(student => {
@@ -11,11 +17,14 @@ router.get('/:studentId', function(req, res, next) {
     .catch(next);
 });
 
-router.get('/', function(req, res, next) {
-  Student.findAll({ include: { all: true } }).then(students =>
-    res.json(students)
-  );
-});
+router.post('/', async (req, res, next) => {
+  try {
+    const newStudent = await Student.create(req.body);
+    res.send(newStudent);
+  } catch (error) {
+    next(error);
+  }
+})
 
 router.put('/:id', function(req, res, next) {
   Student.update(req.body, {
